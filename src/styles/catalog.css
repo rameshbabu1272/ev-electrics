@@ -1,0 +1,237 @@
+/* EV CURSOR AND FILTERS */
+@media (pointer: fine) {
+  .ev-cursor {
+    display: flex;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 24px;
+    align-items: center;
+    color: #00a77f;
+    pointer-events: none !important;
+    user-select: none;
+    filter: drop-shadow(0 3px 5px #002d2270);
+    transition: scale 0.16s ease;
+  }
+  .ev-cursor svg:first-child {
+    width: 29px;
+    height: 20px;
+    stroke-width: 2.4;
+  }
+  .ev-cursor svg:last-child {
+    width: 12px;
+    height: 12px;
+    margin-left: -5px;
+    margin-top: -15px;
+    fill: #00ffc2;
+    color: #006c50;
+  }
+  .ev-cursor.pressed {
+    scale: 0.82;
+  }
+}
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .ev-cursor {
+    display: none;
+  }
+}
+.filter-panel {
+  background: #fff;
+  border: 1px solid #dce3e0;
+  border-radius: 16px;
+  padding: 18px;
+  margin: -6px 0 28px;
+  box-shadow: 0 12px 35px #14251e0b;
+}
+.filter-search {
+  height: 48px;
+  border: 1px solid #ccd5d1;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+}
+.filter-search svg {
+  width: 18px;
+  color: #006c50;
+}
+.filter-search input {
+  border: 0;
+  outline: 0;
+  background: none;
+  width: 100%;
+  font-size: 14px;
+}
+.category-chips {
+  display: flex;
+  gap: 8px;
+  overflow: auto;
+  padding: 14px 0 12px;
+  scrollbar-width: none;
+}
+.category-chips button {
+  border: 1px solid #cbd5d1;
+  background: #f7f9f8;
+  padding: 8px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.category-chips button.active {
+  background: #25292b;
+  color: #00ffc2;
+  border-color: #25292b;
+}
+.filter-controls {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 20px;
+}
+.filter-controls > label:first-child {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 9px;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.filter-controls > label svg {
+  width: 16px;
+}
+.filter-controls input[type="range"] {
+  accent-color: #00b889;
+}
+.stock-filter {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.stock-filter input {
+  accent-color: #00b889;
+}
+.filter-controls select {
+  padding: 9px 11px;
+  border: 1px solid #ccd5d1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+}
+.category-admin > .panel-head p {
+  margin: -13px 0 20px;
+  color: #6d7773;
+  font-size: 13px;
+}
+.category-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr auto;
+  gap: 12px;
+  align-items: end;
+  background: #f4f7f6;
+  padding: 15px;
+  border-radius: 10px;
+}
+.category-create label {
+  font: 700 9px Montserrat;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.category-create input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccd5d1;
+  border-radius: 7px;
+}
+.category-create button {
+  height: 40px;
+  white-space: nowrap;
+}
+.category-create svg {
+  width: 16px;
+}
+.category-list {
+  margin-top: 20px;
+}
+.category-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid #e4e8e6;
+}
+.category-row small {
+  display: block;
+  color: #727c78;
+  margin-top: 5px;
+}
+.category-row > span {
+  font: 700 9px Montserrat;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  border-radius: 99px;
+}
+.category-row .live {
+  background: #d3fff1;
+  color: #006c50;
+}
+.category-row .inactive {
+  background: #eceeed;
+  color: #747b78;
+}
+.category-row button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 7px 9px;
+}
+.category-row button svg {
+  width: 13px;
+}
+@media (max-width: 700px) {
+  .filter-panel {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  .filter-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .filter-controls > label:first-child {
+    grid-column: 1/-1;
+    grid-template-columns: auto 1fr;
+  }
+  .filter-controls > label:first-child b {
+    justify-self: end;
+  }
+  .filter-controls input[type="range"] {
+    grid-column: 1/-1;
+    width: 100%;
+  }
+  .filter-controls select {
+    width: 100%;
+  }
+  .category-create {
+    grid-template-columns: 1fr;
+  }
+  .category-row {
+    grid-template-columns: 1fr auto;
+  }
+  .category-row button {
+    grid-column: 1/-1;
+    justify-content: center;
+  }
+  .ev-cursor {
+    display: none;
+  }
+}
+
+.ev-cursor,
+.ev-cursor * {
+  pointer-events: none !important;
+  user-select: none !important;
+}

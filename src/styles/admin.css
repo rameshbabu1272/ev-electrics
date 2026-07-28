@@ -1,0 +1,86 @@
+/* ADMIN CONTENT CUSTOMIZER */
+.product-actions {
+  display: flex;
+  gap: 7px;
+}
+.product-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.product-actions svg {
+  width: 13px;
+}
+.delete-product {
+  color: #a52a22 !important;
+  border-color: #efc4bf !important;
+  background: #fff4f2 !important;
+}
+.content-editor > .panel-head p {
+  margin: -13px 0 22px;
+  color: #6d7773;
+  font-size: 13px;
+}
+.content-editor form {
+  max-width: 1000px;
+}
+.content-editor h3 {
+  font: 700 15px Montserrat;
+  margin: 30px 0 7px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #e1e6e4;
+  color: #006c50;
+}
+.content-editor label {
+  display: block;
+  text-transform: uppercase;
+  font: 700 9px Montserrat;
+  letter-spacing: 0.08em;
+  margin: 10px 0;
+  color: #56615d;
+}
+.content-editor input,
+.content-editor textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #ccd5d1;
+  border-radius: 7px;
+  background: #fafcfb;
+  font: 400 13px Inter;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.content-editor textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+.save-content {
+  margin-top: 25px;
+  justify-content: center;
+  min-width: 230px;
+}
+.save-content svg {
+  width: 17px;
+}
+.admin-product {
+  grid-template-columns: 70px 1fr 100px auto;
+}
+@media (max-width: 700px) {
+  .content-editor .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .save-content {
+    width: 100%;
+  }
+  .admin-product {
+    grid-template-columns: 55px 1fr auto;
+  }
+  .product-actions {
+    grid-column: 2/-1;
+  }
+  .product-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}

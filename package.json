@@ -1,1 +1,33 @@
-{"name":"volt-motion","private":true,"version":"2.0.0","type":"module","scripts":{"dev":"node server.js --dev","client":"vite","build":"vite build","start":"node server.js"},"dependencies":{"express":"^5.1.0","lucide-react":"latest","react":"latest","react-dom":"latest","sql.js":"^1.13.0","vite":"latest"},"devDependencies":{}}
+{
+  "name": "volt-motion",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js --dev",
+    "client": "vite",
+    "build": "prisma generate && vite build",
+    "start": "node server.js",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "lucide-react": "latest",
+    "prisma": "^6.19.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}

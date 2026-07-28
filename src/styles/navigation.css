@@ -1,0 +1,34 @@
+/* Desktop navigation state: no permanently highlighted first item */
+@media (min-width: 851px) {
+  header > nav > a,
+  header > nav > a:first-child {
+    position: relative;
+    color: #4f5956;
+    border: 0;
+    padding: 25px 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 600;
+  }
+  header > nav > a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: #00a77f;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.22s ease;
+  }
+  header > nav > a.active {
+    color: #006c50;
+    font-weight: 800;
+  }
+  header > nav > a.active::after {
+    transform: scaleX(1);
+  }
+}

@@ -1,0 +1,135 @@
+/* Cross-resolution QA refinements */
+section[id] {
+  scroll-margin-top: 76px;
+}
+.reset-filters {
+  border: 1px solid #c5ceca;
+  background: #fff;
+  color: #44504c;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.reset-filters:hover {
+  border-color: #008e6d;
+  color: #006c50;
+}
+.catalog-empty {
+  border: 1px dashed #b9c7c2;
+  background: #f2f6f4;
+  border-radius: 12px;
+  padding: 34px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 7px;
+  color: #6c7773;
+  margin-top: 15px;
+}
+.catalog-empty svg {
+  color: #009874;
+}
+.catalog-empty b {
+  font: 700 17px Montserrat;
+  color: #28312e;
+}
+.catalog-empty span {
+  font-size: 13px;
+}
+.close,
+.remove {
+  position: relative;
+  z-index: 2;
+}
+.close:focus-visible,
+.remove:focus-visible,
+.reset-filters:focus-visible {
+  outline: 3px solid #00d9a6;
+  outline-offset: 3px;
+}
+@media (max-width: 1050px) and (min-width: 701px) {
+  .filter-controls {
+    grid-template-columns: 1fr auto;
+  }
+  .filter-controls > label:first-child {
+    grid-column: 1/-1;
+  }
+  .reset-filters {
+    justify-self: end;
+  }
+}
+@media (max-width: 700px) {
+  .filter-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .reset-filters {
+    width: 100%;
+  }
+  .catalog-empty {
+    padding: 25px 15px;
+  }
+}
+@media (max-width: 520px) {
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+  .modal {
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+  }
+  .drawer aside {
+    padding-bottom: 90px;
+  }
+}
+@media (max-width: 600px) {
+  .admin-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    gap: 0;
+    padding: 6px 5px;
+    align-items: stretch;
+  }
+  .admin-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .admin-nav .brand-mark,
+  .admin-nav > small {
+    display: none !important;
+  }
+  .admin-nav button {
+    flex: 1 0 43px;
+    min-width: 43px;
+    margin: 0 !important;
+    padding: 8px 4px;
+    justify-content: center;
+    border-radius: 9px;
+  }
+  .admin-nav button svg {
+    width: 18px;
+    height: 18px;
+  }
+  .admin-nav .logout {
+    display: flex !important;
+  }
+  .admin-main {
+    padding-bottom: 92px;
+  }
+  .admin-top > span {
+    display: none;
+  }
+}
+
+/* High-contrast primary hero action */
+.hero .actions .green,
+.hero .actions .green:visited,
+.hero .actions .green:hover,
+.hero .actions .green:active {
+  color: #101917 !important;
+}
+.hero .actions .green svg {
+  color: #101917;
+  stroke: #101917;
+}

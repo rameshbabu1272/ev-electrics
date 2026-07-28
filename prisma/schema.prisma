@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  tag         String
+  price       Int
+  image       String      @db.Text
+  spec1_label String
+  spec1_value String
+  spec2_label String
+  spec2_value String
+  featured    Boolean     @default(false)
+  active      Boolean     @default(true)
+  stock       Int         @default(0)
+  category    String      @default("scooter")
+  created_at  DateTime    @default(now())
+  order_items OrderItem[]
+
+  @@index([category, active])
+  @@map("products")
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  customer_name String
+  email         String
+  phone         String
+  address       String      @db.Text
+  total         Int
+  status        String      @default("new")
+  created_at    DateTime    @default(now())
+  items         OrderItem[]
+
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           Int     @id @default(autoincrement())
+  order_id     Int
+  product_id   Int
+  product_name String
+  quantity     Int
+  price        Int
+  order        Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [product_id], references: [id])
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}
+
+model Repair {
+  id            Int      @id @default(autoincrement())
+  customer_name String
+  email         String
+  phone         String
+  service       String
+  notes         String   @db.Text
+  status        String   @default("requested")
+  created_at    DateTime @default(now())
+
+  @@index([status])
+  @@map("repairs")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String   @db.Text
+  active      Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  @@map("categories")
+}
+
+model SiteSetting {
+  key        String   @id
+  value      Json
+  updated_at DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model Enquiry {
+  id            Int      @id @default(autoincrement())
+  customer_name String
+  email         String
+  phone         String   @default("")
+  subject       String
+  message       String   @db.Text
+  status        String   @default("new")
+  created_at    DateTime @default(now())
+
+  @@index([status])
+  @@map("enquiries")
+}
+
+model Admin {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password_hash String
+  sessions      Session[]
+
+  @@map("admins")
+}
+
+model Session {
+  token      String   @id
+  admin_id   Int
+  expires_at DateTime
+  admin      Admin    @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  @@index([expires_at])
+  @@map("sessions")
+}
