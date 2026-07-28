@@ -12,6 +12,8 @@ import {
   PlusCircle,
   Trash2,
   X,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { api, money } from "../../lib/api.js";
 import { Brand, Field } from "../../components/shared.jsx";
@@ -35,13 +37,23 @@ export default function Admin() {
     [data, setData] = useState(null),
     [tab, setTab] = useState("overview"),
     [edit, setEdit] = useState(null),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [deletingProduct, setDeletingProduct] = useState(null),
+    [toast, setToast] = useState(null),
+    [confirmation, setConfirmation] = useState(null);
+  const notify = (message, type = "success") =>
+    setToast({ id: Date.now(), message, type });
   useEffect(() => {
-    document.body.style.overflow = edit ? "hidden" : "";
+    document.body.style.overflow = edit || confirmation ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [edit]);
+  }, [edit, confirmation]);
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 3600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
   const load = () =>
     api("/api/admin/dashboard")
       .then(setData)
@@ -65,54 +77,103 @@ export default function Admin() {
     );
   if (!data) return <div className="admin-loading">Loading dashboard…</div>;
   const status = async (type, id, value) => {
-    await api(`/api/admin/${type}/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: value }),
-    });
-    load();
+    try {
+      await api(`/api/admin/${type}/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: value }),
+      });
+      await load();
+      notify("Status updated.");
+    } catch (requestError) {
+      notify(requestError.message, "error");
+    }
   };
   const addCategory = async (e) => {
     e.preventDefault();
-    await api("/api/admin/categories", {
-      method: "POST",
-      body: JSON.stringify(Object.fromEntries(new FormData(e.currentTarget))),
-    });
-    e.currentTarget.reset();
-    load();
-  };
-  const deleteCategory = async (item) => {
     try {
-      await api(`/api/admin/categories/${item.id}`, { method: "DELETE" });
-      load();
-    } catch (e) {
-      alert(e.message);
+      await api("/api/admin/categories", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(new FormData(e.currentTarget))),
+      });
+      e.currentTarget.reset();
+      await load();
+      notify("Category created successfully.");
+    } catch (requestError) {
+      notify(requestError.message, "error");
     }
   };
+  const deleteCategory = async (item) => {
+    setConfirmation({
+      title: "Delete category?",
+      message: `This will remove “${item.name}” from the active category list.`,
+      confirmLabel: "Delete category",
+      onConfirm: async () => {
+        try {
+          await api(`/api/admin/categories/${item.id}`, { method: "DELETE" });
+          await load();
+          notify(`${item.name} was deleted.`);
+        } catch (requestError) {
+          notify(requestError.message, "error");
+        }
+      },
+    });
+  };
   const deleteProduct = async (p) => {
-    if (!confirm(`Delete ${p.name}?`)) return;
-    await api(`/api/admin/products/${p.id}`, { method: "DELETE" });
-    load();
+    setConfirmation({
+      title: "Delete product?",
+      message: `Remove “${p.name}” from your inventory and storefront?`,
+      confirmLabel: "Delete product",
+      onConfirm: async () => {
+        setDeletingProduct(p.id);
+        try {
+          const result = await api(`/api/admin/products/${p.id}`, {
+            method: "DELETE",
+          });
+          await load();
+          notify(
+            result.archived
+              ? `${p.name} was removed. Its order history was preserved.`
+              : `${p.name} was deleted successfully.`,
+          );
+        } catch (requestError) {
+          notify(requestError.message, "error");
+        } finally {
+          setDeletingProduct(null);
+        }
+      },
+    });
   };
   const saveContent = async (e) => {
     e.preventDefault();
     const payload = Object.fromEntries(new FormData(e.currentTarget));
-    await api("/api/admin/content", {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    });
-    load();
+    try {
+      await api("/api/admin/content", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      await load();
+      notify("Website content saved successfully.");
+    } catch (requestError) {
+      notify(requestError.message, "error");
+    }
   };
   const saveProduct = async (e) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.currentTarget));
     f.featured = Boolean(f.featured);
     f.active = Boolean(f.active);
-    await api(
-      edit.id ? `/api/admin/products/${edit.id}` : "/api/admin/products",
-      { method: edit.id ? "PUT" : "POST", body: JSON.stringify(f) },
-    );
-    setEdit(null);
-    load();
+    const action = edit.id ? "updated" : "created";
+    try {
+      await api(
+        edit.id ? `/api/admin/products/${edit.id}` : "/api/admin/products",
+        { method: edit.id ? "PUT" : "POST", body: JSON.stringify(f) },
+      );
+      setEdit(null);
+      await load();
+      notify(`Product ${action} successfully.`);
+    } catch (requestError) {
+      notify(requestError.message, "error");
+    }
   };
   return (
     <div className="admin-shell">
@@ -383,11 +444,13 @@ export default function Admin() {
                   <div className="product-actions">
                     <button onClick={() => setEdit(p)}>Edit</button>
                     <button
+                      type="button"
                       className="delete-product"
                       onClick={() => deleteProduct(p)}
+                      disabled={deletingProduct === p.id}
                     >
                       <Trash2 />
-                      Delete
+                      {deletingProduct === p.id ? "Deleting…" : "Delete"}
                     </button>
                   </div>
                 </div>
@@ -435,14 +498,24 @@ export default function Admin() {
                     </div>
                     <button
                       className="delete-product"
-                      onClick={async () => {
-                        if (confirm("Delete this enquiry?")) {
-                          await api(`/api/admin/enquiries/${q.id}`, {
-                            method: "DELETE",
-                          });
-                          load();
-                        }
-                      }}
+                      onClick={() =>
+                        setConfirmation({
+                          title: "Delete enquiry?",
+                          message: `Delete the enquiry from ${q.customer_name}? This cannot be undone.`,
+                          confirmLabel: "Delete enquiry",
+                          onConfirm: async () => {
+                            try {
+                              await api(`/api/admin/enquiries/${q.id}`, {
+                                method: "DELETE",
+                              });
+                              await load();
+                              notify("Enquiry deleted successfully.");
+                            } catch (requestError) {
+                              notify(requestError.message, "error");
+                            }
+                          },
+                        })
+                      }
                     >
                       <Trash2 />
                       Delete
@@ -586,6 +659,80 @@ export default function Admin() {
           </form>
         </div>
       )}
+      {confirmation && (
+        <ConfirmDialog
+          {...confirmation}
+          onCancel={() => setConfirmation(null)}
+          onAccept={async () => {
+            const action = confirmation.onConfirm;
+            setConfirmation(null);
+            await action();
+          }}
+        />
+      )}
+      {toast && <AdminToast toast={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+function ConfirmDialog({
+  title,
+  message,
+  confirmLabel,
+  onCancel,
+  onAccept,
+}) {
+  const [working, setWorking] = useState(false);
+  return (
+    <div className="confirm-wrap" role="presentation">
+      <button
+        type="button"
+        className="confirm-shade"
+        aria-label="Cancel"
+        onClick={onCancel}
+      />
+      <section
+        className="confirm-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-message"
+      >
+        <div className="confirm-icon">
+          <AlertTriangle />
+        </div>
+        <p className="eyebrow">PLEASE CONFIRM</p>
+        <h2 id="confirm-title">{title}</h2>
+        <p id="confirm-message">{message}</p>
+        <div className="confirm-actions">
+          <button type="button" className="confirm-cancel" onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="confirm-delete"
+            disabled={working}
+            onClick={async () => {
+              setWorking(true);
+              await onAccept();
+            }}
+          >
+            <Trash2 />
+            {working ? "Working…" : confirmLabel}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+function AdminToast({ toast, onClose }) {
+  const Icon = toast.type === "error" ? AlertTriangle : CheckCircle2;
+  return (
+    <div className={`admin-toast ${toast.type}`} role="status" aria-live="polite">
+      <Icon />
+      <span>{toast.message}</span>
+      <button type="button" aria-label="Dismiss notification" onClick={onClose}>
+        <X />
+      </button>
     </div>
   );
 }

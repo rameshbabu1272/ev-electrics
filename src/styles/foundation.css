@@ -65,12 +65,28 @@ nav button {
 .green {
   border: 0;
   background: var(--green);
-  border-radius: 7px;
-  padding: 11px 18px;
+  color: #10241f;
+  border-radius: 10px;
+  padding: 12px 19px;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 8px 22px rgb(0 255 194 / 18%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+.cart:hover,
+.green:hover {
+  filter: brightness(0.96);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgb(0 202 154 / 28%);
+}
+.cart:active,
+.green:active {
+  transform: translateY(0) scale(0.98);
 }
 .cart b {
   background: #1a1c1e;
@@ -428,10 +444,32 @@ aside {
 }
 .close {
   position: absolute;
-  right: 25px;
-  top: 25px;
-  border: 0;
-  background: none;
+  right: 16px;
+  top: 16px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #25312d;
+  border: 1px solid #d8dfdc;
+  border-radius: 50%;
+  background: #f5f8f7;
+  box-shadow: 0 5px 14px rgb(24 42 36 / 10%);
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+.close:hover {
+  color: #073d30;
+  border-color: #8ddfca;
+  background: #dffff6;
+  transform: rotate(6deg) scale(1.05);
+}
+.close svg {
+  width: 19px;
+  height: 19px;
 }
 .empty {
   padding: 50px 0;

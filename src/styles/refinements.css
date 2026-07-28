@@ -38,7 +38,10 @@ section[id] {
 .catalog-empty span {
   font-size: 13px;
 }
-.close,
+.close {
+  position: absolute;
+  z-index: 2;
+}
 .remove {
   position: relative;
   z-index: 2;
@@ -78,6 +81,14 @@ section[id] {
   .modal {
     max-height: calc(100dvh - 28px);
     overflow-y: auto;
+    padding-top: 58px;
+  }
+  .modal .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
   }
   .drawer aside {
     padding-bottom: 90px;

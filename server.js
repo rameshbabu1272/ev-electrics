@@ -340,7 +340,7 @@ app.get("/api/admin/dashboard", requireAdmin, async (_req, res) => {
     categories,
     content,
   ] = await Promise.all([
-    prisma.product.count(),
+    prisma.product.count({ where: { active: true } }),
     prisma.order.count(),
     prisma.repair.count(),
     prisma.enquiry.count({ where: { status: { not: "closed" } } }),
@@ -348,7 +348,10 @@ app.get("/api/admin/dashboard", requireAdmin, async (_req, res) => {
       where: { status: { not: "cancelled" } },
       _sum: { total: true },
     }),
-    prisma.product.findMany({ orderBy: { id: "desc" } }),
+    prisma.product.findMany({
+      where: { active: true },
+      orderBy: { id: "desc" },
+    }),
     prisma.order.findMany({ orderBy: { id: "desc" } }),
     prisma.repair.findMany({ orderBy: { id: "desc" } }),
     prisma.enquiry.findMany({ orderBy: { id: "desc" } }),
@@ -472,11 +475,24 @@ app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
-  await prisma.product.update({
-    where: { id: Number(req.params.id) },
-    data: { active: false },
+  const id = Number(req.params.id);
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product) return res.status(404).json({ error: "Product not found" });
+
+  const linkedOrders = await prisma.orderItem.count({
+    where: { product_id: id },
   });
-  res.json({ ok: true });
+
+  if (linkedOrders > 0) {
+    await prisma.product.update({
+      where: { id },
+      data: { active: false },
+    });
+    return res.json({ ok: true, archived: true });
+  }
+
+  await prisma.product.delete({ where: { id } });
+  res.json({ ok: true, archived: false });
 });
 app.patch("/api/admin/orders/:id", requireAdmin, async (req, res) => {
   await prisma.order.update({

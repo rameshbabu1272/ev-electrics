@@ -25,7 +25,7 @@ model Product {
   order_items OrderItem[]
 
   @@index([category, active])
-  @@map("products")
+  @@map("sai_ev_products")
 }
 
 model Order {
@@ -40,7 +40,7 @@ model Order {
   items         OrderItem[]
 
   @@index([status])
-  @@map("orders")
+  @@map("sai_ev_orders")
 }
 
 model OrderItem {
@@ -55,7 +55,7 @@ model OrderItem {
 
   @@index([order_id])
   @@index([product_id])
-  @@map("order_items")
+  @@map("sai_ev_order_items")
 }
 
 model Repair {
@@ -69,7 +69,7 @@ model Repair {
   created_at    DateTime @default(now())
 
   @@index([status])
-  @@map("repairs")
+  @@map("sai_ev_repairs")
 }
 
 model Category {
@@ -80,7 +80,7 @@ model Category {
   active      Boolean  @default(true)
   created_at  DateTime @default(now())
 
-  @@map("categories")
+  @@map("sai_ev_categories")
 }
 
 model SiteSetting {
@@ -88,7 +88,7 @@ model SiteSetting {
   value      Json
   updated_at DateTime @updatedAt
 
-  @@map("site_settings")
+  @@map("sai_ev_site_settings")
 }
 
 model Enquiry {
@@ -102,7 +102,7 @@ model Enquiry {
   created_at    DateTime @default(now())
 
   @@index([status])
-  @@map("enquiries")
+  @@map("sai_ev_enquiries")
 }
 
 model Admin {
@@ -111,7 +111,7 @@ model Admin {
   password_hash String
   sessions      Session[]
 
-  @@map("admins")
+  @@map("sai_ev_admins")
 }
 
 model Session {
@@ -121,5 +121,5 @@ model Session {
   admin      Admin    @relation(fields: [admin_id], references: [id], onDelete: Cascade)
 
   @@index([expires_at])
-  @@map("sessions")
+  @@map("sai_ev_sessions")
 }

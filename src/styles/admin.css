@@ -16,6 +16,204 @@
   border-color: #efc4bf !important;
   background: #fff4f2 !important;
 }
+.delete-product:hover:not(:disabled) {
+  color: #fff !important;
+  border-color: #b83229 !important;
+  background: #b83229 !important;
+  box-shadow: 0 8px 20px rgb(184 50 41 / 22%);
+}
+.delete-product:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+.admin-feedback {
+  position: sticky;
+  top: 14px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 0 0 20px;
+  padding: 13px 16px;
+  color: #073d30;
+  background: #d9fff3;
+  border: 1px solid #78dfc1;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgb(16 48 39 / 10%);
+  font-size: 13px;
+  font-weight: 700;
+}
+.admin-feedback button {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  color: #075441;
+  background: rgb(255 255 255 / 65%);
+  border: 0;
+  border-radius: 50%;
+}
+.admin-feedback svg {
+  width: 16px;
+}
+.confirm-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.confirm-shade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgb(14 20 18 / 68%);
+  backdrop-filter: blur(8px);
+}
+.confirm-card {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 32px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0, rgb(255 226 218 / 70%), transparent 42%),
+    #fff;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 28%);
+  animation: confirm-pop 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.confirm-icon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 18px;
+  place-items: center;
+  color: #b83229;
+  background: #fff0ed;
+  border: 1px solid #ffc8bf;
+  border-radius: 19px;
+  transform: rotate(-4deg);
+}
+.confirm-icon svg {
+  width: 29px;
+  height: 29px;
+}
+.confirm-card h2 {
+  margin: 6px 0 10px;
+  font: 800 25px Montserrat;
+}
+.confirm-card > p:not(.eyebrow) {
+  max-width: 340px;
+  margin: 0 auto;
+  color: #65706c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 26px;
+}
+.confirm-actions button {
+  min-height: 46px;
+  padding: 11px 16px;
+  border-radius: 11px;
+  font-weight: 800;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+.confirm-actions button:hover {
+  transform: translateY(-2px);
+}
+.confirm-cancel {
+  color: #35413d;
+  background: #f3f6f5;
+  border: 1px solid #d7dfdc;
+}
+.confirm-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  background: linear-gradient(135deg, #d9473c, #a92720);
+  border: 0;
+  box-shadow: 0 10px 24px rgb(176 43 34 / 25%);
+}
+.confirm-delete svg {
+  width: 17px;
+}
+.admin-toast {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 120;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 11px;
+  width: min(390px, calc(100vw - 28px));
+  min-height: 66px;
+  padding: 12px 12px 12px 16px;
+  color: #093c30;
+  background: rgb(239 255 250 / 96%);
+  border: 1px solid #80dfc4;
+  border-radius: 15px;
+  box-shadow: 0 20px 55px rgb(17 62 50 / 22%);
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+  font-weight: 700;
+  animation: toast-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.admin-toast.error {
+  color: #76251f;
+  background: rgb(255 244 242 / 97%);
+  border-color: #f0aea7;
+}
+.admin-toast > svg {
+  width: 22px;
+  color: #008b69;
+}
+.admin-toast.error > svg {
+  color: #c63e34;
+}
+.admin-toast button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  color: inherit;
+  background: rgb(255 255 255 / 64%);
+  border: 0;
+  border-radius: 50%;
+}
+.admin-toast button svg {
+  width: 15px;
+}
+@keyframes confirm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(35px) scale(0.96);
+  }
+}
 .content-editor > .panel-head p {
   margin: -13px 0 22px;
   color: #6d7773;
@@ -82,5 +280,21 @@
   .product-actions button {
     flex: 1;
     justify-content: center;
+  }
+  .confirm-card {
+    padding: 27px 18px 18px;
+    border-radius: 20px;
+  }
+  .confirm-actions {
+    grid-template-columns: 1fr;
+  }
+  .confirm-delete {
+    grid-row: 1;
+  }
+  .admin-toast {
+    top: 12px;
+    right: 14px;
+    left: 14px;
+    width: auto;
   }
 }
