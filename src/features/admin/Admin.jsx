@@ -90,12 +90,14 @@ export default function Admin() {
   };
   const addCategory = async (e) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const payload = Object.fromEntries(new FormData(form));
     try {
       await api("/api/admin/categories", {
         method: "POST",
-        body: JSON.stringify(Object.fromEntries(new FormData(e.currentTarget))),
+        body: JSON.stringify(payload),
       });
-      e.currentTarget.reset();
+      form.reset();
       await load();
       notify("Category created successfully.");
     } catch (requestError) {
@@ -410,6 +412,7 @@ export default function Admin() {
                     {item.active ? "Live" : "Inactive"}
                   </span>
                   <button
+                    type="button"
                     className="delete-product"
                     onClick={() => deleteCategory(item)}
                   >

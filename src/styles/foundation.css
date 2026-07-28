@@ -703,6 +703,28 @@ aside {
   width: 100%;
   margin-top: 20px;
 }
+.modal .submit[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.82;
+}
+.modal .submit[aria-busy="true"]::before {
+  width: 15px;
+  height: 15px;
+  content: "";
+  border: 2px solid rgb(16 36 31 / 28%);
+  border-top-color: #10241f;
+  border-radius: 50%;
+  animation: submit-spin 700ms linear infinite;
+}
+.modal .close:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+@keyframes submit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .admin-loading {
   min-height: 100vh;
   display: grid;

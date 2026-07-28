@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ShoppingBag,
   Globe2,
@@ -33,6 +33,7 @@ export default function Store() {
     [cartOpen, setCartOpen] = useState(false),
     [book, setBook] = useState(false),
     [checkout, setCheckout] = useState(false),
+    [submittingRepair, setSubmittingRepair] = useState(false),
     [notice, setNotice] = useState(""),
     [active, setActive] = useState(() => location.hash.slice(1) || "shop"),
     [content, setContent] = useState(defaultContent),
@@ -42,6 +43,7 @@ export default function Store() {
     [maxPrice, setMaxPrice] = useState(150000),
     [inStock, setInStock] = useState(false),
     [sort, setSort] = useState("featured");
+  const repairSubmissionLock = useRef(false);
   const c = content;
   useEffect(() => {
     document.body.style.overflow = cartOpen || book || checkout ? "hidden" : "";
@@ -134,16 +136,47 @@ export default function Store() {
   };
   const submitRepair = async (e) => {
     e.preventDefault();
+    if (repairSubmissionLock.current) return;
+    repairSubmissionLock.current = true;
+    setSubmittingRepair(true);
     const body = Object.fromEntries(new FormData(e.currentTarget));
+    const whatsappNumber = String(c.whatsapp_number || "").replace(/\D/g, "");
+    const whatsappWindow = whatsappNumber
+      ? window.open(
+          `https://wa.me/${whatsappNumber}`,
+          "_blank",
+        )
+      : null;
     try {
       const r = await api("/api/repairs", {
         method: "POST",
         body: JSON.stringify(body),
       });
+      const whatsappMessage = [
+        "New electric scooter repair request",
+        `Request ID: #${r.id}`,
+        `Name: ${body.customer_name}`,
+        `Phone: ${body.phone}`,
+        `Email: ${body.email}`,
+        `Service: ${body.service}`,
+        `Notes: ${body.notes || "None"}`,
+      ].join("\n");
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+      if (whatsappWindow && !whatsappWindow.closed) {
+        whatsappWindow.location.href = whatsappUrl;
+      } else if (whatsappNumber) {
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
       setBook(false);
-      setNotice(`Repair request #${r.id} received.`);
+      setNotice(
+        `Repair request #${r.id} received. Your WhatsApp message is ready to send.`,
+      );
     } catch (x) {
+      whatsappWindow?.close();
       setNotice(x.message);
+    } finally {
+      repairSubmissionLock.current = false;
+      setSubmittingRepair(false);
     }
   };
   const submitOrder = async (e) => {
@@ -723,8 +756,12 @@ export default function Store() {
         <FormModal
           title="Book a repair"
           eyebrow="SAI ELECTICS WORKSHOP"
-          onClose={() => setBook(false)}
+          onClose={() => {
+            if (!submittingRepair) setBook(false);
+          }}
           onSubmit={submitRepair}
+          submitLabel="Submit repair request"
+          submitting={submittingRepair}
         >
           <p>We’ll confirm your time within one business hour.</p>
           <Field name="customer_name" label="Name" />

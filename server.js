@@ -280,13 +280,29 @@ app.post("/api/repairs", async (req, res) => {
     )
   )
     return res.status(400).json({ error: "Complete all required fields" });
+  const normalized = {
+    customer_name: customer_name.trim(),
+    email: email.trim(),
+    phone: phone.trim(),
+    service: service.trim(),
+    notes: String(notes).trim(),
+  };
+  const recentRequest = await prisma.repair.findFirst({
+    where: {
+      customer_name: normalized.customer_name,
+      email: normalized.email,
+      phone: normalized.phone,
+      service: normalized.service,
+      created_at: { gte: new Date(Date.now() - 60_000) },
+    },
+    orderBy: { id: "desc" },
+  });
+  if (recentRequest)
+    return res.json({ id: recentRequest.id, duplicate: true });
+
   const row = await prisma.repair.create({
     data: {
-      customer_name: customer_name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      service: service.trim(),
-      notes: String(notes).trim(),
+      ...normalized,
     },
   });
   res.status(201).json({ id: row.id });
@@ -418,10 +434,7 @@ app.delete("/api/admin/categories/:id", requireAdmin, async (req, res) => {
     return res
       .status(400)
       .json({ error: "Move or delete products in this category first" });
-  await prisma.category.update({
-    where: { id: category.id },
-    data: { active: false },
-  });
+  await prisma.category.delete({ where: { id: category.id } });
   res.json({ ok: true });
 });
 app.put("/api/admin/content", requireAdmin, async (req, res) => {

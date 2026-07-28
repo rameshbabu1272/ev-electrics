@@ -117,10 +117,18 @@ export function Field({
     </label>
   );
 }
-export function FormModal({ title, eyebrow, onClose, onSubmit, children }) {
+export function FormModal({
+  title,
+  eyebrow,
+  onClose,
+  onSubmit,
+  children,
+  submitLabel = "Submit",
+  submitting = false,
+}) {
   return (
     <div className="modal-wrap" role="presentation">
-      <div className="shade" onClick={onClose} />
+      <div className="shade" onClick={submitting ? undefined : onClose} />
       <form
         className="modal"
         role="dialog"
@@ -133,13 +141,20 @@ export function FormModal({ title, eyebrow, onClose, onSubmit, children }) {
           className="close"
           aria-label="Close"
           onClick={onClose}
+          disabled={submitting}
         >
           <X />
         </button>
         <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
         {children}
-        <button className="green submit">Submit</button>
+        <button
+          className="green submit"
+          disabled={submitting}
+          aria-busy={submitting}
+        >
+          {submitting ? "Please wait…" : submitLabel}
+        </button>
       </form>
     </div>
   );
