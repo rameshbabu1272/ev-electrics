@@ -1,2 +1,0 @@
-# ev-electrics
-EV Electrics
