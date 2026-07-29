@@ -14,6 +14,7 @@ import {
   X,
   CheckCircle2,
   AlertTriangle,
+  LoaderCircle,
 } from "lucide-react";
 import { api, money } from "../../lib/api.js";
 import { Brand, Field } from "../../components/shared.jsx";
@@ -32,6 +33,21 @@ const blank = {
   featured: false,
   active: true,
 };
+const formatDate = (value, includeTime = false) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    ...(includeTime
+      ? {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      : {}),
+  }).format(date);
+};
 export default function Admin() {
   const [user, setUser] = useState(null),
     [data, setData] = useState(null),
@@ -39,21 +55,27 @@ export default function Admin() {
     [edit, setEdit] = useState(null),
     [error, setError] = useState(""),
     [deletingProduct, setDeletingProduct] = useState(null),
-    [toast, setToast] = useState(null),
+    [operation, setOperation] = useState(null),
     [confirmation, setConfirmation] = useState(null);
+  const beginOperation = (title) =>
+    setOperation({
+      status: "loading",
+      title,
+      message: "Please wait while we complete your request.",
+    });
   const notify = (message, type = "success") =>
-    setToast({ id: Date.now(), message, type });
+    setOperation({
+      status: type,
+      title: type === "error" ? "Action failed" : "Completed successfully",
+      message,
+    });
   useEffect(() => {
-    document.body.style.overflow = edit || confirmation ? "hidden" : "";
+    document.body.style.overflow =
+      edit || confirmation || operation ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [edit, confirmation]);
-  useEffect(() => {
-    if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(null), 3600);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+  }, [edit, confirmation, operation]);
   const load = () =>
     api("/api/admin/dashboard")
       .then(setData)
@@ -77,6 +99,7 @@ export default function Admin() {
     );
   if (!data) return <div className="admin-loading">Loading dashboard…</div>;
   const status = async (type, id, value) => {
+    beginOperation("Updating status");
     try {
       await api(`/api/admin/${type}/${id}`, {
         method: "PATCH",
@@ -92,6 +115,7 @@ export default function Admin() {
     e.preventDefault();
     const form = e.currentTarget;
     const payload = Object.fromEntries(new FormData(form));
+    beginOperation("Creating category");
     try {
       await api("/api/admin/categories", {
         method: "POST",
@@ -110,6 +134,7 @@ export default function Admin() {
       message: `This will remove “${item.name}” from the active category list.`,
       confirmLabel: "Delete category",
       onConfirm: async () => {
+        beginOperation("Deleting category");
         try {
           await api(`/api/admin/categories/${item.id}`, { method: "DELETE" });
           await load();
@@ -126,6 +151,7 @@ export default function Admin() {
       message: `Remove “${p.name}” from your inventory and storefront?`,
       confirmLabel: "Delete product",
       onConfirm: async () => {
+        beginOperation("Deleting product");
         setDeletingProduct(p.id);
         try {
           const result = await api(`/api/admin/products/${p.id}`, {
@@ -148,6 +174,7 @@ export default function Admin() {
   const saveContent = async (e) => {
     e.preventDefault();
     const payload = Object.fromEntries(new FormData(e.currentTarget));
+    beginOperation("Saving website changes");
     try {
       await api("/api/admin/content", {
         method: "PUT",
@@ -165,6 +192,7 @@ export default function Admin() {
     f.featured = Boolean(f.featured);
     f.active = Boolean(f.active);
     const action = edit.id ? "updated" : "created";
+    beginOperation(edit.id ? "Updating product" : "Creating product");
     try {
       await api(
         edit.id ? `/api/admin/products/${edit.id}` : "/api/admin/products",
@@ -203,8 +231,14 @@ export default function Admin() {
         <button
           className="logout"
           onClick={async () => {
-            await api("/api/admin/logout", { method: "POST" });
-            setUser(null);
+            beginOperation("Signing out");
+            try {
+              await api("/api/admin/logout", { method: "POST" });
+              setOperation(null);
+              setUser(null);
+            } catch (requestError) {
+              notify(requestError.message, "error");
+            }
           }}
         >
           <LogOut />
@@ -484,7 +518,7 @@ export default function Admin() {
                         <b>{q.subject}</b>
                         <small>
                           #{q.id} ·{" "}
-                          {new Date(q.created_at + "Z").toLocaleString()}
+                          {formatDate(q.created_at, true)}
                         </small>
                       </div>
                       <Status
@@ -507,6 +541,7 @@ export default function Admin() {
                           message: `Delete the enquiry from ${q.customer_name}? This cannot be undone.`,
                           confirmLabel: "Delete enquiry",
                           onConfirm: async () => {
+                            beginOperation("Deleting enquiry");
                             try {
                               await api(`/api/admin/enquiries/${q.id}`, {
                                 method: "DELETE",
@@ -539,14 +574,17 @@ export default function Admin() {
           <div className="admin-panel">
             <h2>Repair bookings</h2>
             <div className="table-wrap">
-              <table>
+              <table className="repair-table">
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Customer</th>
+                    <th>Phone</th>
                     <th>Service</th>
+                    <th>Notes</th>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -557,10 +595,10 @@ export default function Admin() {
                         <b>{r.customer_name}</b>
                         <small>{r.email}</small>
                       </td>
+                      <td>{r.phone}</td>
                       <td>{r.service}</td>
-                      <td>
-                        {new Date(r.created_at + "Z").toLocaleDateString()}
-                      </td>
+                      <td className="repair-notes">{r.notes || "—"}</td>
+                      <td>{formatDate(r.created_at, true)}</td>
                       <td>
                         <Status
                           value={r.status}
@@ -573,6 +611,36 @@ export default function Admin() {
                           ]}
                           onChange={(v) => status("repairs", r.id, v)}
                         />
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="delete-product table-action"
+                          onClick={() =>
+                            setConfirmation({
+                              title: "Delete repair booking?",
+                              message: `Delete repair R-${r.id} for ${r.customer_name}? This cannot be undone.`,
+                              confirmLabel: "Delete booking",
+                              onConfirm: async () => {
+                                beginOperation("Deleting repair booking");
+                                try {
+                                  await api(`/api/admin/repairs/${r.id}`, {
+                                    method: "DELETE",
+                                  });
+                                  await load();
+                                  notify(
+                                    `Repair booking R-${r.id} was deleted.`,
+                                  );
+                                } catch (requestError) {
+                                  notify(requestError.message, "error");
+                                }
+                              },
+                            })
+                          }
+                        >
+                          <Trash2 />
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -673,7 +741,12 @@ export default function Admin() {
           }}
         />
       )}
-      {toast && <AdminToast toast={toast} onClose={() => setToast(null)} />}
+      {operation && (
+        <ActionDialog
+          operation={operation}
+          onClose={() => setOperation(null)}
+        />
+      )}
     </div>
   );
 }
@@ -727,15 +800,42 @@ function ConfirmDialog({
     </div>
   );
 }
-function AdminToast({ toast, onClose }) {
-  const Icon = toast.type === "error" ? AlertTriangle : CheckCircle2;
+function ActionDialog({ operation, onClose }) {
+  const isLoading = operation.status === "loading";
+  const Icon =
+    operation.status === "error"
+      ? AlertTriangle
+      : isLoading
+        ? LoaderCircle
+        : CheckCircle2;
   return (
-    <div className={`admin-toast ${toast.type}`} role="status" aria-live="polite">
-      <Icon />
-      <span>{toast.message}</span>
-      <button type="button" aria-label="Dismiss notification" onClick={onClose}>
-        <X />
-      </button>
+    <div className="action-dialog-wrap" role="presentation">
+      <div className="action-dialog-shade" />
+      <section
+        className={`action-dialog-card ${operation.status}`}
+        role="alertdialog"
+        aria-modal="true"
+        aria-busy={isLoading}
+        aria-live="assertive"
+      >
+        <div className="action-dialog-icon">
+          <Icon />
+        </div>
+        <p className="eyebrow">
+          {isLoading
+            ? "PROCESSING"
+            : operation.status === "error"
+              ? "PLEASE CHECK"
+              : "ALL DONE"}
+        </p>
+        <h2>{operation.title}</h2>
+        <p>{operation.message}</p>
+        {!isLoading && (
+          <button type="button" className="green" onClick={onClose} autoFocus>
+            {operation.status === "error" ? "Close" : "Done"}
+          </button>
+        )}
+      </section>
     </div>
   );
 }
@@ -798,7 +898,7 @@ function OrderTable({ rows, status }) {
                 <small>{o.email}</small>
               </td>
               <td>{money(o.total)}</td>
-              <td>{new Date(o.created_at + "Z").toLocaleDateString()}</td>
+              <td>{formatDate(o.created_at)}</td>
               <td>
                 <Status
                   value={o.status}
